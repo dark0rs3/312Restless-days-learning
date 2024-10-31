@@ -3,6 +3,18 @@ File Inclusion/ Traversal Vulnerabilities:
 
 Path traversal or directory traversal is a vulnerability which allows an attacker to read arbitrary files on the server which they should not have access
 
+This allows attackers to read files on the server including: 
+a) Application code and data.
+b) Credentials for back-end systems.
+c) Sensitive operating system files.
+
+The areas that need to be checked are:
+a)Are there request parameters which could be used for file-related operations?
+c) Are there unusual file extensions?
+d) Are there interesting variable names?
+
+In some cases the attacker may be able to not only read the files but also write them allowing them to modify the application data and ultimately take full control of the server. 
+
 However an attacker does not know the name or contents of files present in the server, so an attacker can look for default files present in server , like passwd file present inside etc directory in linux os. and boot.ini file present in windows os.
 
 The checklist for this attack is:
@@ -12,7 +24,52 @@ The checklist for this attack is:
 You can try adding as many "../../../../../' as possible and see whether you will retrieve it.
 You can try looking for the boot.ini file in the windows OS. 
 
+Example: 
+http://example.com/index.php?page=../../../etc/passwd
+
 2. You can also check without the "../../../" since server may be configured to block the traversal sequences. So instead of using the "../../../" no matter where you are if you just type the "/etc/passwd/" You will still get the output.
 So this just checks the "../../../../../" traversal sequences.
 
-3. You can also check the traversal sequences stripped non-recursively 
+Example: 
+http://example.com/index.php?page=/etc/passwd
+No "../../../" since they will be detected.
+
+3. You can also check the traversal sequences stripped non recursively. This non recursive means that the stripes are being stripped without going back and forth. Meaning the ....// the part being removed is the ..(../)/ leaving the outer ../ and since the program is non recursive it will not come back to check the ../ it left. It means that the program is only going through that code once. If it was recursive then it would have been going back and forth many times and after the firs strip it would have come back a second time and noted that there is still a ../ left but now its non recursive.
+
+Meaning in this we write:
+http://example.com/index.php?page=....//....//....//etc/passwd
+http://example.com/index.php?page=....\/....\/....\/etc/passwd
+http://some.domain.com/static/%5c..%5c..%5c..%5c..%5c..%5c..%5c..%5c/etc/passwd
+
+You can also write: "..././..././..././etc/passwd" In this the (../) will be stripped leaving the (../) just as the other one.
+ 
+This will bypass the non recursive stripping.
+
+4.You can also check the file traversal sequences stripped with superfluous URL decode.
+In this the application blocks an input containing the traversal sequences it then performs a URL decode of the input before using it. 
+So in this we can bypass it by, first decoding our, "../../../etc/passwd". If we only do this once it will not work since the application first checks for the traversal sequences if they are absent then it decodes the URl. So if you encoded it once, then it will be decoded and your traversal will be visible what we do is encode it more than once, that is twice, thrice etc.
+
+Example:
+http://example.com/index.php?page=..%252f..%252f..%252fetc%252fpasswd
+http://example.com/index.php?page=..%c0%af..%c0%af..%c0%afetc%c0%afpasswd
+http://example.com/index.php?page=%252e%252e%252fetc%252fpasswd
+http://example.com/index.php?page=%252e%252e%252fetc%252fpasswd%00
+
+5. You can also check the file traversal through the, validation of start of path.
+Some applications check the start of the path whether it is inline with what they start with. 
+Example:  (Request) GET /image?filename=/var/www/images/74.jpg HTTP/2
+
+In the above get request normally when checking for the file traversal, we will delete the "/var/www/images" and then put down our traversal but doing that in this application is a mistake since this application checks the start of path meaning the "/var/www/images" must be there meaning instead of deleting it we leave it there and then append the traversal on it so that the application sees it when its doing its checks and executes our command.
+Example: 
+http://example.com/index.php?page=/var/www/images/etc/passwd
+Or, http://example.com/index.php?page=/var/www/images/../../../../../../etc/passwd.
+
+6. You can also check the file traversal through the validation of the file extension with the null byte bypass.
+In this the application is configured to validate whether the file name extension ends with the expected extension.
+So in this, http://example.com/index.php?page=/var/www/images/74.jpg, the application checks to see whether the jpg will be available in the get request if its not there then it will know some malicious information has been keyed in and it will act accordingly.
+So for this we will add a "%00" at the end of our "/etc/passwd" to make it "/etc/passwd%00" because of the initial .jpg extension that was there.
+
+Example: 
+http://example.com/index.php?page=/var/www/images/../../../../../../etc/passwd%00.jpg(or whatever extension you have)
+
+Those are the six areas you can check while you are testing for file traversal in your CTFs or bug bounties.
