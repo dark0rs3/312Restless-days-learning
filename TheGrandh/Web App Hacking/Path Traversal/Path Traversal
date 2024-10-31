@@ -8,10 +8,35 @@ a) Application code and data.
 b) Credentials for back-end systems.
 c) Sensitive operating system files.
 
-The areas that need to be checked are:
+The areas that need to be checked briefly are:
 a)Are there request parameters which could be used for file-related operations?
 c) Are there unusual file extensions?
 d) Are there interesting variable names?
+
+How to test for path traversal vulnerabilities.
+a) Look for areas where the request parameter appears to contain the name of a file or directory ie "include=main.inc" or "template=/en/sidebar". So we look for any functions that tries to retrieve data from the server's file system like the images and office documents.
+b) Look for any errors that are outputted once you supply data to the APIs. Sometimes the error messages give you a message saying, "No such file in /var/www/images" etc and with that you get to know the file structure of the system.
+c) Modify the parameter's value by inserting an abitrary sub directory and then insert a single traversal. If the output is the same then the server has a path traversal vulnerability. 
+Example:
+If, http://example.com/index.php?page=images/phones/samsung.png will print a samsung.png and in the same images folder there is another folder named laptops and we do this, http://example.com/index.php?page=images/laptops/../phones/samsung.png and the server accepts that input and executes it, then there is a high possiblility of having a path traversal in that application. Now you can try accessing the \windows\win.ini in windows or /etc/passwd in linux systems.
+
+4. If the output of the two above is different then maybe the application is blocking, stripping or sanitizing our input so we may try to encode or bypass the filters which we will do below.  
+
+5. If the function you are attacking provides write access to files try writing two files one that you can write and another  that you cannot write. 
+Example: 
+Do this for windows systems;
+../../../../../../../../../../../../writetest.txt
+../../../../../../../../../../../../windows/system32/config/sam
+
+Do this for unix systems;
+../../../../../../../../../../../../tmp/writetest.txt
+../../../../../../../../../../../../tmp
+
+If the output in say for the linux systems is different then probably there is a vulnerability.
+
+6. To verify this flaw with write access is to try to write a new file within the webroot of the web server and then try to retrieve it with the browser.
+
+NB: Always check both sequences the / and the \ no matter which system you are on. Windows tolerates  both / and \ but unix systems only tolerate / but if the unix system is calling to windows back-end then it will still accept the \.
 
 In some cases the attacker may be able to not only read the files but also write them allowing them to modify the application data and ultimately take full control of the server. 
 
@@ -73,3 +98,6 @@ Example:
 http://example.com/index.php?page=/var/www/images/../../../../../../etc/passwd%00.jpg(or whatever extension you have)
 
 Those are the six areas you can check while you are testing for file traversal in your CTFs or bug bounties.
+
+The filter checklist:
+
