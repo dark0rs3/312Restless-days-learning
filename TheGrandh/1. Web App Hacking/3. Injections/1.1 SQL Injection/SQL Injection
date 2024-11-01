@@ -44,6 +44,18 @@ Alternatively you can just use your burp scanner if you do not want to get into 
 
 Most SQli vulnerabilities occur in the WHERE clause of a SELECT query, but that doesn't mean you cannot find them anywhere else.
 
+The other areas where they arise is the:
 
-
-
+a) In UPDATE statements, within the updated values, or the WHERE clause.
+b) In INSERT statements, within the inserted values.
+c) In SELECT statements, within the table or column name.
+d) In SELECT statements, within the ORDER BY clause.
+e) In DELETE statements, within the WHERE clause to delete records.
+f) In JOIN Clauses, SQLi can manipulate joins between tables.
+g) In Stored Procedures, this is where parameters are not properly sanitized.
+h) In Union Queries, this is in combining results from multiple select statements.
+i) In Search Queries, this is in iput fields that search database records.
+j) In subqueries, this is in nested queries that that run within another SQL query.
+k) In Database Funtions, this calls to funtions that are executed within SQL statements.
+l) In Dynamic SQL, this is in sql statements comstructed at a runtime using concatenated user input.
+m) In Metadata Queries, This is in interacting with the database schema information.
