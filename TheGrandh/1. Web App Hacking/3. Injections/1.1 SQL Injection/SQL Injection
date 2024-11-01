@@ -59,3 +59,19 @@ j) In subqueries, this is in nested queries that that run within another SQL que
 k) In Database Funtions, this calls to funtions that are executed within SQL statements.
 l) In Dynamic SQL, this is in sql statements comstructed at a runtime using concatenated user input.
 m) In Metadata Queries, This is in interacting with the database schema information.
+
+SQL Injection Examples include:
+a) Retrieving hidden data.
+---------------------------
+This is where we will mostly use the 1=1 bu tyou should be cautious with this one because if the 1=1 is used in the wrong statement it may be really bad. 
+Example:
+In the select statement the 1 = 1 can show more information than needed. Now thats what we want. But in the Update and the Delete statement thats not what we want. Because in the Update, this will update all and in the delete this will delete all since you gave it the command of 1 = 1. Imagine you are pentesting a company and you accidentally use the 1 = 1 in either the update or delete. That's a really big loss because they lose all the data.
+Example: 
+UPDATE users SET password='newpassword' WHERE username='admin' OR 1=1; 
+This will update all user's password to 'newpassword' because of the 1 = 1 command. So watch out!
+
+b) Subverting the application logic where you can change the query to interfere with the application logic. An example of this is the common username and password bypass with the SQL. In this the application originally checks both the username and password, SELECT * FROM users WHERE username = 'user' AND password = 'pass'; but after the injection, SELECT * FROM users WHERE username = 'user' AND password = '' OR '1'='1'; the application only checks the username and for the password since 1 = 1 is always true it doesn't check it.
+
+c) Union attacks, this is where you can retrieve data from different tables. take tables as bags where some information is stored but information that is similary used. like we can have a username and passwords table thats stores users and pass, we can have an item list table thats stores maybe items in a mall or online shop etc.
+
+d) Blind SQli, this is where the results of the query you control are not returned in the appliations responses. This means that its not that the SQl isnt working, in the background it is the only difference is that you are not seeing it. For this attack you can spot it using burp but not the browser. 
